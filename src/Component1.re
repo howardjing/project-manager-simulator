@@ -17,7 +17,31 @@ let handleClick = (_event, _self) => Js.log("clicked!");
 let make = (~message, _children) => {
   ...component,
   render: self =>
-    <div onClick=(self.handle(handleClick))>
-      (ReasonReact.string(message))
+    <div>
+      <div>(ReasonReact.string("Here are some tickets:"))</div>
+      <ul>
+        (
+          List.map((ticket: Ticket.ticket) =>
+            <li>
+              <div>
+                <h3>(ReasonReact.string(ticket.title))</h3>
+                <div>
+                  <span>
+                    (ticket.complexity |> Ticket.complexityToString |> ReasonReact.string)
+                    (ReasonReact.string(" | "))
+                    (ticket.state |> Ticket.stateToString |> ReasonReact.string)
+                  </span>
+                </div>
+                <div>(ReasonReact.string(ticket.content))</div>
+              </div>
+            </li>
+          , Ticket.tickets)
+            |> Array.of_list
+            |> ReasonReact.array
+        )
+      </ul>
+      <div onClick=(self.handle(handleClick))>
+        (ReasonReact.string(message))
+      </div>
     </div>,
 };
