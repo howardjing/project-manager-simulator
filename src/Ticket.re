@@ -83,6 +83,30 @@ let ticket7 = {
   parent: Some(ticket2),
 }
 
+let ticket8 = {
+  title: "Add ability to create new ticket",
+  content: "I'd like to have the ability to create a new ticket. Currently the only tickets that show up have been hardcoded in.",
+  complexity: Medium,
+  state: NotStarted,
+  parent: None,
+}
+
+let ticket9 = {
+  title: "Add ability to edit a ticket",
+  content: {| I'd like to be able to update a ticket's title / content / complexity / state / parent once it's been created. |},
+  complexity: Large,
+  state: NotStarted,
+  parent: None,
+}
+
+let ticket10 = {
+  title: "Render tickets in columns",
+  content: "Instead of rendering our list of tickets as an unordered list, I'd like a column view where each column represents the ticket's state.",
+  complexity: Medium,
+  state: NotStarted,
+  parent: None,
+}
 
 
-let tickets = [ticket1, ticket2, ticket3, ticket4, ticket5, ticket6, ticket7];
+
+let tickets = [ticket1, ticket2, ticket3, ticket4, ticket5, ticket6, ticket7, ticket8, ticket9, ticket10];
