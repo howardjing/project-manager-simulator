@@ -137,5 +137,22 @@ let ticket11 = {
   state: Completed,
 }
 
+let ticket12 = makeAncestorTicket(
+  ~title="Add ability to estimate completion time of tickets",
+  ~content={| For now a rough estimate. Estimation will be in terms of number of sprints. A sprint will have a baseline velocity. Once velocity is
+    hit, no further tickets will be processed. Tickets will have a certain probability of completion based on complexity. If a ticket fails to complete,
+    it is rolled over into the next sprint. Failed tickets have a probability to decrement in complexity. Iterate until no more tickets.
+  |},
+  ~complexity=Large,
+)
 
-let tickets = [ticket1, ticket2, ticket3, ticket4, ticket5, ticket6, ticket7, ticket8, ticket9, ticket10, ticket11];
+let ticket13 = makeAncestorTicket(
+  ~title="Add ability to randomly generate futher tickets",
+  ~content={| To better estimate project complexity, assume that tickets have a certain probability to generate further tickets. These tickets are added to the
+    backlog.
+  |},
+  ~complexity=Large,
+)
+
+
+let tickets = [ticket1, ticket2, ticket3, ticket4, ticket5, ticket6, ticket7, ticket8, ticket9, ticket10, ticket11, ticket12, ticket13];
