@@ -33,6 +33,20 @@ let make = (~message, _children) => {
                   </span>
                 </div>
                 <div>(ReasonReact.string(ticket.content))</div>
+                (if (List.length(ticket.comments) == 0) { ReasonReact.null } else {
+                  <>
+                  <h4>(ReasonReact.string("Comments:"))</h4>
+                  <ul>
+                    (
+                      List.map((comment: Ticket.comment) =>
+                        <li>(ReasonReact.string(comment.content))</li>
+                      , ticket.comments)
+                      |> Array.of_list
+                      |> ReasonReact.array
+                    )
+                  </ul>
+                  </>
+                })
               </div>
             </li>
           , Ticket.tickets)
