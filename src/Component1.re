@@ -6,6 +6,44 @@ let component = ReasonReact.statelessComponent("Page");
    and other utilities */
 let handleClick = (_event, _self) => Js.log("clicked!");
 
+let renderSprint = (tickets: list(Ticket.ticket)) => {
+  <ul>
+    (
+      List.map((ticket: Ticket.ticket) =>
+        <li>
+          <div>
+            <h3>(ReasonReact.string(ticket.title))</h3>
+            <div>
+              <span>
+                (ticket.complexity |> Ticket.complexityToString |> ReasonReact.string)
+                (ReasonReact.string(" | "))
+                (ticket.state |> Ticket.stateToString |> ReasonReact.string)
+              </span>
+            </div>
+            <div>(ReasonReact.string(ticket.content))</div>
+            (if (List.length(ticket.comments) == 0) { ReasonReact.null } else {
+              <>
+              <h4>(ReasonReact.string("Comments:"))</h4>
+              <ul>
+                (
+                  List.map((comment: Ticket.comment) =>
+                    <li>(ReasonReact.string(comment.content))</li>
+                  , ticket.comments)
+                  |> Array.of_list
+                  |> ReasonReact.array
+                )
+              </ul>
+              </>
+            })
+          </div>
+        </li>
+      , tickets)
+        |> Array.of_list
+        |> ReasonReact.array
+    )
+  </ul>
+}
+
 /* `make` is the function that mandatorily takes `children` (if you want to use
    `JSX). `message` is a named argument, which simulates ReactJS props. Usage:
 
@@ -18,44 +56,10 @@ let make = (~message, _children) => {
   ...component,
   render: self =>
     <div>
-      <div>(ReasonReact.string("Here are some tickets:"))</div>
-      <ul>
-        (
-          List.map((ticket: Ticket.ticket) =>
-            <li>
-              <div>
-                <h3>(ReasonReact.string(ticket.title))</h3>
-                <div>
-                  <span>
-                    (ticket.complexity |> Ticket.complexityToString |> ReasonReact.string)
-                    (ReasonReact.string(" | "))
-                    (ticket.state |> Ticket.stateToString |> ReasonReact.string)
-                  </span>
-                </div>
-                <div>(ReasonReact.string(ticket.content))</div>
-                (if (List.length(ticket.comments) == 0) { ReasonReact.null } else {
-                  <>
-                  <h4>(ReasonReact.string("Comments:"))</h4>
-                  <ul>
-                    (
-                      List.map((comment: Ticket.comment) =>
-                        <li>(ReasonReact.string(comment.content))</li>
-                      , ticket.comments)
-                      |> Array.of_list
-                      |> ReasonReact.array
-                    )
-                  </ul>
-                  </>
-                })
-              </div>
-            </li>
-          , Ticket.tickets)
-            |> Array.of_list
-            |> ReasonReact.array
-        )
-      </ul>
-      <div onClick=(self.handle(handleClick))>
-        (ReasonReact.string(message))
-      </div>
+      <h1>(ReasonReact.string("Sprint 0:"))</h1>
+      (renderSprint(Ticket.tickets))
+      <hr />
+      <h1>(ReasonReact.string("Sprint 1:"))</h1>
+      (renderSprint(Ticket.tickets2))
     </div>,
 };

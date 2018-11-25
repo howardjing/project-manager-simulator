@@ -37,6 +37,50 @@ let makeAncestorTicket = (~title, ~content, ~complexity) => {
   comments: [],
 };
 
+let work = (getLimit: (complexity) => int, tickets: list(ticket)): list(ticket) => {
+
+  /* TODO: Refactor this to use a map instead of a list */
+  let workDone = [];
+
+  let start = ([], workDone);
+
+  let countDone = (complexity, workDone: list((complexity, int))): int => {
+    switch (List.find(((c, _)) => complexity == c, workDone)) {
+      | (_, count) => count
+      | exception Not_found => 0
+    }
+  }
+
+  let incrementDoneCounts = (complexity, workDone: list((complexity, int))): list((complexity, int)) => {
+    switch (List.find(((c, _)) => complexity == c, workDone)) {
+      | _ => List.map( ((c, count)) => {
+        if (c == complexity) {
+          (c, count + 1)
+        } else {
+          (c, count)
+        }
+      }, workDone)
+      | exception Not_found => [(complexity, 1), ...workDone]
+    }
+  }
+
+  List.fold_left(((processed, workDone), ticket) => {
+    let limit = getLimit(ticket.complexity);
+    let alreadyDone = countDone(ticket.complexity, workDone);
+
+    /* we've reached our limit, or the ticket was already finished, so don't do work */
+    if (alreadyDone >= limit || ticket.state == Completed) {
+      ([ticket, ...processed], workDone)
+    } else {
+      let workedOnTicket = {
+        ...ticket,
+        state: Completed,
+      };
+      ([workedOnTicket, ...processed], incrementDoneCounts(ticket.complexity, workDone))
+    }
+  }, start, tickets) |> fst |> List.rev;
+};
+
 let makeChildTicket = (~title, ~content, ~complexity, ~parent) => { ...makeAncestorTicket(~title, ~content, ~complexity), parent }
 
 let ticket1 = makeAncestorTicket(
@@ -154,5 +198,21 @@ let ticket13 = makeAncestorTicket(
   ~complexity=Large,
 )
 
+let ticket14 = makeChildTicket(
+  ~title="Figure out how to use hashmaps",
+  ~content={| Can't find a simple to follow example of using a hashmap. |},
+  ~complexity=Small,
+  ~parent=Some(ticket1),
+)
 
-let tickets = [ticket1, ticket2, ticket3, ticket4, ticket5, ticket6, ticket7, ticket8, ticket9, ticket10, ticket11, ticket12, ticket13];
+let limits = (complexity): int => {
+  switch(complexity) {
+    | Small => 3
+    | Medium => 2
+    | Large => 1
+  }
+}
+
+let tickets = [ticket1, ticket2, ticket3, ticket4, ticket5, ticket6, ticket7, ticket8, ticket9, ticket10, ticket11, ticket12, ticket13, ticket14];
+let tickets2 = work(limits, tickets);
+let tickets3 = work(limits, tickets2);
