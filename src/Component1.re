@@ -61,5 +61,16 @@ let make = (~message, _children) => {
       <hr />
       <h1>(ReasonReact.string("Sprint 1:"))</h1>
       (renderSprint(Ticket.tickets2))
+      <hr />
+      (
+        List.mapi((i: int, sprint: list(Ticket.ticket)) =>
+          <div>
+            <h1>(ReasonReact.string("Sprint " ++ string_of_int(i) ++ ":"))</h1>
+              (renderSprint(sprint))
+          </div>
+        , Ticket.project
+        ) |> Array.of_list
+          |> ReasonReact.array
+      )
     </div>,
 };

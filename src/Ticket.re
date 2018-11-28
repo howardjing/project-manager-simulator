@@ -37,8 +37,9 @@ let makeAncestorTicket = (~title, ~content, ~complexity) => {
   comments: [],
 };
 
-let work = (getLimit: (complexity) => int, tickets: list(ticket)): list(ticket) => {
+let isComplete: list(ticket) => bool = List.for_all((ticket) => ticket.state == Completed);
 
+let work = (getLimit: (complexity) => int, tickets: list(ticket)): list(ticket) => {
   /* TODO: Refactor this to use a map instead of a list */
   let workDone = [];
 
@@ -80,6 +81,14 @@ let work = (getLimit: (complexity) => int, tickets: list(ticket)): list(ticket) 
     }
   }, start, tickets) |> fst |> List.rev;
 };
+
+let rec doWork = (getLimit: (complexity) => int, currentSprint: list(ticket), previousSprints: list(list(ticket))): list(list(ticket)) => {
+  if (isComplete(currentSprint)) {
+    [currentSprint, ...previousSprints]
+  } else {
+    doWork(getLimit, work(getLimit, currentSprint), [currentSprint, ...previousSprints])
+  }
+}
 
 let makeChildTicket = (~title, ~content, ~complexity, ~parent) => { ...makeAncestorTicket(~title, ~content, ~complexity), parent }
 
@@ -205,6 +214,13 @@ let ticket14 = makeChildTicket(
   ~parent=Some(ticket1),
 )
 
+let ticket15 = makeChildTicket(
+  ~title="Figure out how to convert ints to string",
+  ~content={| We can only concat strings with strings -- figure out how to concat a string with a number. |},
+  ~complexity=Small,
+  ~parent=Some(ticket1),
+)
+
 let limits = (complexity): int => {
   switch(complexity) {
     | Small => 3
@@ -213,6 +229,7 @@ let limits = (complexity): int => {
   }
 }
 
-let tickets = [ticket1, ticket2, ticket3, ticket4, ticket5, ticket6, ticket7, ticket8, ticket9, ticket10, ticket11, ticket12, ticket13, ticket14];
+let tickets = [ticket1, ticket2, ticket3, ticket4, ticket5, ticket6, ticket7, ticket8, ticket9, ticket10, ticket11, ticket12, ticket13, ticket14, ticket15];
 let tickets2 = work(limits, tickets);
 let tickets3 = work(limits, tickets2);
+let project = doWork(limits, tickets, []) |> List.rev;
