@@ -56,12 +56,6 @@ let make = (~message, _children) => {
   ...component,
   render: self =>
     <div>
-      <h1>(ReasonReact.string("Sprint 0:"))</h1>
-      (renderSprint(Ticket.tickets))
-      <hr />
-      <h1>(ReasonReact.string("Sprint 1:"))</h1>
-      (renderSprint(Ticket.tickets2))
-      <hr />
       (
         List.mapi((i: int, sprint: list(Ticket.ticket)) =>
           <div>

@@ -39,6 +39,14 @@ let makeAncestorTicket = (~title, ~content, ~complexity) => {
 
 let isComplete: list(ticket) => bool = List.for_all((ticket) => ticket.state == Completed);
 
+Random.self_init();
+
+/**
+ * Generate a random number between 0 and 1. If the given rate is lower than the generated number,
+ * return true. Otherwise return false.
+ */
+let sometimesFail = (rate: float): bool => Random.float(1.0) < rate;
+
 let work = (getLimit: (complexity) => int, tickets: list(ticket)): list(ticket) => {
   /* TODO: Refactor this to use a map instead of a list */
   let workDone = [];
@@ -70,7 +78,7 @@ let work = (getLimit: (complexity) => int, tickets: list(ticket)): list(ticket) 
     let alreadyDone = countDone(ticket.complexity, workDone);
 
     /* we've reached our limit, or the ticket was already finished, so don't do work */
-    if (alreadyDone >= limit || ticket.state == Completed) {
+    if (alreadyDone >= limit || ticket.state == Completed || sometimesFail(0.2) ) {
       ([ticket, ...processed], workDone)
     } else {
       let workedOnTicket = {
