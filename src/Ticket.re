@@ -45,56 +45,31 @@ Random.self_init();
  * Generate a random number between 0 and 1. If the given rate is lower than the generated number,
  * return true. Otherwise return false.
  */
-let sometimesFail = (rate: float): bool => Random.float(1.0) < rate;
+let sometimes = (rate: float): bool => Random.float(1.0) < rate;
 
-let work = (getLimit: (complexity) => int, tickets: list(ticket)): list(ticket) => {
-  /* TODO: Refactor this to use a map instead of a list */
-  let workDone = [];
+let work = (points: (complexity) => int, velocity: int, tickets: list(ticket)): list(ticket) => {
 
-  let start = ([], workDone);
+  List.fold_left(((processed, pointsDone), ticket) => {
+    let nextPointsDone = pointsDone + points(ticket.complexity);
 
-  let countDone = (complexity, workDone: list((complexity, int))): int => {
-    switch (List.find(((c, _)) => complexity == c, workDone)) {
-      | (_, count) => count
-      | exception Not_found => 0
-    }
-  }
-
-  let incrementDoneCounts = (complexity, workDone: list((complexity, int))): list((complexity, int)) => {
-    switch (List.find(((c, _)) => complexity == c, workDone)) {
-      | _ => List.map( ((c, count)) => {
-        if (c == complexity) {
-          (c, count + 1)
-        } else {
-          (c, count)
-        }
-      }, workDone)
-      | exception Not_found => [(complexity, 1), ...workDone]
-    }
-  }
-
-  List.fold_left(((processed, workDone), ticket) => {
-    let limit = getLimit(ticket.complexity);
-    let alreadyDone = countDone(ticket.complexity, workDone);
-
-    /* we've reached our limit, or the ticket was already finished, so don't do work */
-    if (alreadyDone >= limit || ticket.state == Completed || sometimesFail(0.2) ) {
-      ([ticket, ...processed], workDone)
+    /* we've reached our limit, or the ticket was already finished, or sometimes we don't feel like doing something, so don't do work */
+    if (nextPointsDone > velocity || ticket.state == Completed || sometimes(0.1) ) {
+      ([ticket, ...processed], pointsDone)
     } else {
       let workedOnTicket = {
         ...ticket,
         state: Completed,
       };
-      ([workedOnTicket, ...processed], incrementDoneCounts(ticket.complexity, workDone))
+      ([workedOnTicket, ...processed], nextPointsDone)
     }
-  }, start, tickets) |> fst |> List.rev;
+  }, ([], 0), tickets) |> fst |> List.rev;
 };
 
-let rec doWork = (getLimit: (complexity) => int, currentSprint: list(ticket), previousSprints: list(list(ticket))): list(list(ticket)) => {
+let rec doWork = (points: (complexity) => int, velocity: int, currentSprint: list(ticket), previousSprints: list(list(ticket))): list(list(ticket)) => {
   if (isComplete(currentSprint)) {
     [currentSprint, ...previousSprints]
   } else {
-    doWork(getLimit, work(getLimit, currentSprint), [currentSprint, ...previousSprints])
+    doWork(points, velocity, work(points, velocity, currentSprint), [currentSprint, ...previousSprints])
   }
 }
 
@@ -229,15 +204,16 @@ let ticket15 = makeChildTicket(
   ~parent=Some(ticket1),
 )
 
-let limits = (complexity): int => {
+
+let points = (complexity): int => {
   switch(complexity) {
-    | Small => 3
-    | Medium => 2
-    | Large => 1
+    | Small => 2
+    | Medium => 3
+    | Large => 5
   }
 }
 
+let ourVelocity = 5
+
 let tickets = [ticket1, ticket2, ticket3, ticket4, ticket5, ticket6, ticket7, ticket8, ticket9, ticket10, ticket11, ticket12, ticket13, ticket14, ticket15];
-let tickets2 = work(limits, tickets);
-let tickets3 = work(limits, tickets2);
-let project = doWork(limits, tickets, []) |> List.rev;
+let project = doWork(points, ourVelocity, tickets, []) |> List.rev;
