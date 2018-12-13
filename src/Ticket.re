@@ -53,7 +53,7 @@ let work = (points: (complexity) => int, velocity: int, tickets: list(ticket)): 
     let nextPointsDone = pointsDone + points(ticket.complexity);
 
     /* we've reached our limit, or the ticket was already finished, or sometimes we don't feel like doing something, so don't do work */
-    if (nextPointsDone > velocity || ticket.state == Completed || sometimes(0.1) ) {
+    if (nextPointsDone > velocity || ticket.state == Completed || sometimes(0.2) ) {
       ([ticket, ...processed], pointsDone)
     } else {
       let workedOnTicket = {
@@ -74,6 +74,14 @@ let rec doWork = (points: (complexity) => int, velocity: int, currentSprint: lis
 }
 
 let makeChildTicket = (~title, ~content, ~complexity, ~parent) => { ...makeAncestorTicket(~title, ~content, ~complexity), parent }
+
+let totalPoints = (points: (complexity) => int, tickets: list(ticket)): int => {
+  List.fold_left((sum, ticket) => { sum + points(ticket.complexity) }, 0, tickets)
+}
+
+let naiveEstimate = (points: (complexity) => int, velocity: int, tickets: list(ticket)): int => {
+  float_of_int(totalPoints(points, tickets)) /. float_of_int(velocity) |> ceil |> int_of_float
+}
 
 let ticket1 = makeAncestorTicket(
   ~title="Learn basics of Reason ML",
@@ -204,6 +212,18 @@ let ticket15 = makeChildTicket(
   ~parent=Some(ticket1),
 )
 
+let ticket16 = makeAncestorTicket(
+  ~title="Compute naive estimate of project",
+  ~content="Given a team's velocity and total number of points, estimate the number sprints it will take to complete the project.",
+  ~complexity=Medium,
+)
+
+let ticket17 = makeChildTicket(
+  ~title="Display naive estimate of project",
+  ~content="Display the naive estimate of a project.",
+  ~complexity=Small,
+  ~parent=Some(ticket16)
+)
 
 let points = (complexity): int => {
   switch(complexity) {
@@ -215,5 +235,5 @@ let points = (complexity): int => {
 
 let ourVelocity = 5
 
-let tickets = [ticket1, ticket2, ticket3, ticket4, ticket5, ticket6, ticket7, ticket8, ticket9, ticket10, ticket11, ticket12, ticket13, ticket14, ticket15];
+let tickets = [ticket1, ticket2, ticket3, ticket4, ticket5, ticket6, ticket7, ticket8, ticket9, ticket10, ticket11, ticket12, ticket13, ticket14, ticket15, ticket16, ticket17];
 let project = doWork(points, ourVelocity, tickets, []) |> List.rev;

@@ -44,6 +44,9 @@ let renderSprint = (tickets: list(Ticket.ticket)) => {
   </ul>
 }
 
+let totalPoints = Ticket.totalPoints(Ticket.points)
+let naiveEstimate = Ticket.naiveEstimate(Ticket.points)
+
 /* `make` is the function that mandatorily takes `children` (if you want to use
    `JSX). `message` is a named argument, which simulates ReactJS props. Usage:
 
@@ -56,15 +59,18 @@ let make = (~message, _children) => {
   ...component,
   render: self =>
     <div>
-      (
-        List.mapi((i: int, sprint: list(Ticket.ticket)) =>
-          <div>
-            <h1>(ReasonReact.string("Sprint " ++ string_of_int(i) ++ ":"))</h1>
-              (renderSprint(sprint))
-          </div>
-        , Ticket.project
-        ) |> Array.of_list
-          |> ReasonReact.array
-      )
+      <div>(ReasonReact.string("Total Points: " ++ string_of_int(totalPoints(Ticket.tickets)) ++ ", Sprints: " ++ string_of_int(naiveEstimate(Ticket.ourVelocity, Ticket.tickets))))</div>
+      <div>
+        (
+          List.mapi((i: int, sprint: list(Ticket.ticket)) =>
+            <div>
+              <h1>(ReasonReact.string("Sprint " ++ string_of_int(i + 1) ++ ":"))</h1>
+                (renderSprint(sprint))
+            </div>
+          , Ticket.project
+          ) |> Array.of_list
+            |> ReasonReact.array
+        )
+      </div>
     </div>,
 };
