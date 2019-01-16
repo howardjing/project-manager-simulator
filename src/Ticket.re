@@ -7,6 +7,7 @@ type comment = {
 };
 
 type ticket = {
+  fromSprint: int,
   title: string,
   content: string,
   complexity,
@@ -29,6 +30,7 @@ let stateToString = (state) => switch (state) {
 }
 
 let makeAncestorTicket = (~title, ~content, ~complexity) => {
+  fromSprint: 0,
   title,
   content,
   complexity,
@@ -36,6 +38,15 @@ let makeAncestorTicket = (~title, ~content, ~complexity) => {
   parent: None,
   comments: [],
 };
+
+let generateTicket = (~fromSprint, ~complexity) => {
+  ...makeAncestorTicket(
+    ~title="Generated Ticket " ++ string_of_int(fromSprint),
+    ~content="While doing this sprint, we've decided to do some more work.",
+    ~complexity,
+  ),
+  fromSprint,
+}
 
 let isComplete: list(ticket) => bool = List.for_all((ticket) => ticket.state == Completed);
 
@@ -47,9 +58,9 @@ Random.self_init();
  */
 let sometimes = (rate: float): bool => Random.float(1.0) < rate;
 
-let work = (points: (complexity) => int, velocity: int, tickets: list(ticket)): list(ticket) => {
+let work = (points: (complexity) => int, velocity: int, tickets: list(ticket), sprintCount: int): list(ticket) => {
 
-  List.fold_left(((processed, pointsDone), ticket) => {
+  let workDone = List.fold_left(((processed, pointsDone), ticket) => {
     let nextPointsDone = pointsDone + points(ticket.complexity);
 
     /* we've reached our limit, or the ticket was already finished, or sometimes we don't feel like doing something, so don't do work */
@@ -63,13 +74,28 @@ let work = (points: (complexity) => int, velocity: int, tickets: list(ticket)): 
       ([workedOnTicket, ...processed], nextPointsDone)
     }
   }, ([], 0), tickets) |> fst |> List.rev;
+
+  let moreWork = if (sometimes(0.1)) {
+    [generateTicket(~fromSprint=sprintCount, ~complexity=Small)]
+  } else if (sometimes(0.05)) {
+    [generateTicket(~fromSprint=sprintCount, ~complexity=Medium)]
+  } else if (sometimes(0.05)) {
+    [generateTicket(~fromSprint=sprintCount, ~complexity=Large)]
+  } else {
+    []
+  }
+
+  List.concat([workDone, moreWork])
 };
 
+/**
+ * entry function that does work
+ */
 let rec doWork = (points: (complexity) => int, velocity: int, currentSprint: list(ticket), previousSprints: list(list(ticket))): list(list(ticket)) => {
   if (isComplete(currentSprint)) {
     [currentSprint, ...previousSprints]
   } else {
-    doWork(points, velocity, work(points, velocity, currentSprint), [currentSprint, ...previousSprints])
+    doWork(points, velocity, work(points, velocity, currentSprint, List.length(previousSprints)), [currentSprint, ...previousSprints])
   }
 }
 

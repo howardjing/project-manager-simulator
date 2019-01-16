@@ -59,7 +59,7 @@ let make = (~message, _children) => {
   ...component,
   render: self =>
     <div>
-      <div>(ReasonReact.string("Total Points: " ++ string_of_int(totalPoints(Ticket.tickets)) ++ ", Sprints: " ++ string_of_int(naiveEstimate(Ticket.ourVelocity, Ticket.tickets))))</div>
+      <div>(ReasonReact.string("Initial (naive) estimate | Total Points: " ++ string_of_int(totalPoints(Ticket.tickets)) ++ ", Sprints: " ++ string_of_int(naiveEstimate(Ticket.ourVelocity, Ticket.tickets))))</div>
       <div>
         (
           List.mapi((i: int, sprint: list(Ticket.ticket)) =>
