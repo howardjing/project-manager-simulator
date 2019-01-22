@@ -16,6 +16,8 @@ type ticket = {
   comments: list(comment),
 };
 
+let states: list(state) = [NotStarted, InProgress, NeedsQA, Completed];
+
 let complexityToString = (complexity) => switch (complexity) {
   | Small => "small"
   | Medium => "medium"
