@@ -1,6 +1,6 @@
 
 type complexity = Small | Medium | Large;
-type state = NotStarted | InProgress | NeedsQA | Completed;
+type state = NotStarted | InProgress | Completed;
 
 type comment = {
   content: string,
@@ -16,7 +16,7 @@ type ticket = {
   comments: list(comment),
 };
 
-let states: list(state) = [NotStarted, InProgress, NeedsQA, Completed];
+let states: list(state) = [NotStarted, InProgress, Completed];
 
 let complexityToString = (complexity) => switch (complexity) {
   | Small => "small"
@@ -27,7 +27,6 @@ let complexityToString = (complexity) => switch (complexity) {
 let stateToString = (state) => switch (state) {
   | NotStarted => "not started"
   | InProgress => "in progress"
-  | NeedsQA => "needs qa"
   | Completed => "completed"
 }
 
@@ -83,8 +82,15 @@ let work = (points: (complexity) => int, velocity: int, tickets: list(ticket), s
     let moreDiscoveredWork = sometimesSpawnMoreTickets(~fromSprint={sprintCount}, ~parent=Some(ticket))
 
     /* we've reached our limit, or the ticket was already finished, or sometimes we don't feel like doing something, so don't do work */
-    if (nextPointsDone > velocity || ticket.state == Completed || sometimes(0.2) ) {
+    if (nextPointsDone > velocity || ticket.state == Completed || sometimes(0.05) ) {
       ([ticket, ...processed], pointsDone)
+    } else if (sometimes(0.15)) {
+      /* sometimes let a ticket roll over */
+      let workedOnTicket = {
+        ...ticket,
+        state: InProgress,
+      };
+      (List.concat([[workedOnTicket, ...processed], moreDiscoveredWork]), nextPointsDone)
     } else {
       let workedOnTicket = {
         ...ticket,
